@@ -1,3 +1,6 @@
+@php
+    use Illuminate\Support\Str;
+@endphp
 @extends('layouts.app')
 @section('title', 'Faculty Dashboard')
 @section('page-title', 'Faculty Dashboard')
@@ -87,7 +90,7 @@
                                 ];
                                 $colors = $statusColors[$p->status] ?? ['bg' => '#e5e7eb', 'text' => '#374151'];
                             @endphp
-                            <span style="background: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">
+                            <span data-status-badge="true" data-bg="{{ $colors['bg'] }}" data-text="{{ $colors['text'] }}" style="padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; display: inline-block;">
                                 {{ $p->status_label }}
                             </span>
                         </td>
@@ -114,7 +117,7 @@
     <!-- Recent Activity Card -->
     <div style="background: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
         <h4 style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">Quick Stats</h4>
-        <div style="space-y: 0.75rem;">
+        <div>
             <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
                 <span style="color: #6b7280;">Total Submissions Assigned</span>
                 <span style="font-weight: 600; color: #111827;">{{ $stats['total_submissions'] ?? 0 }}</span>
@@ -148,5 +151,13 @@
         </ul>
     </div>
 </div>
+
+<script>
+    // Apply status badge colors from data attributes
+    document.querySelectorAll('[data-status-badge]').forEach(badge => {
+        badge.style.backgroundColor = badge.dataset.bg;
+        badge.style.color = badge.dataset.text;
+    });
+</script>
 
 @endsection

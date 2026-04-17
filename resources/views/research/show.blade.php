@@ -50,30 +50,30 @@
         </div>
  
         {{-- Faculty Feedback --}}
-        @if($researchProject->feedbacks->isNotEmpty())
+        @if($researchProject->reviews && $researchProject->reviews->isNotEmpty())
         <div class="card">
             <div class="card-header"><h3>Faculty Feedback</h3></div>
-            @foreach($researchProject->feedbacks as $fb)
+            @foreach($researchProject->reviews as $review)
             <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #f9fafb;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;flex-wrap:wrap;gap:.5rem;">
                     <div style="display:flex;align-items:center;gap:.5rem;">
-                        <img src="{{ $fb->faculty->avatar_url }}" style="width:28px;height:28px;border-radius:50%;" alt="">
-                        <span style="font-size:.8125rem;font-weight:500;">{{ $fb->faculty->full_name }}</span>
+                        <img src="{{ $review->faculty->avatar_url }}" style="width:28px;height:28px;border-radius:50%;" alt="">
+                        <span style="font-size:.8125rem;font-weight:500;">{{ $review->faculty->full_name }}</span>
                         <span style="font-size:.72rem;color:var(--ink-mute);">· Faculty</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:.65rem;">
-                        @if($fb->decision)
-                        <span class="badge {{ $fb->decision === 'approved' ? 'badge-approved' : ($fb->decision === 'rejected' ? 'badge-rejected' : 'badge-revision') }}">
-                            {{ ucfirst(str_replace('_', ' ', $fb->decision)) }}
+                        @if($review->recommendation)
+                        <span class="badge {{ $review->recommendation === 'approve' ? 'badge-approved' : ($review->recommendation === 'reject' ? 'badge-rejected' : 'badge-review') }}">
+                            {{ ucfirst($review->recommendation) }}
                         </span>
                         @endif
-                        @if($fb->rating)
-                        <span style="font-size:.8rem;color:#d97706;">{{ str_repeat('★', $fb->rating) }}{{ str_repeat('☆', 5 - $fb->rating) }}</span>
+                        @if($review->rating)
+                        <span style="font-size:.8rem;color:#d97706;">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span>
                         @endif
-                        <span style="font-size:.72rem;color:var(--ink-mute);">{{ $fb->created_at->format('M d, Y') }}</span>
+                        <span style="font-size:.72rem;color:var(--ink-mute);">{{ $review->created_at->format('M d, Y') }}</span>
                     </div>
                 </div>
-                <p style="font-size:.875rem;color:var(--ink-soft);line-height:1.7;">{{ $fb->comment }}</p>
+                <p style="font-size:.875rem;color:var(--ink-soft);line-height:1.7;">{{ $review->feedback }}</p>
             </div>
             @endforeach
         </div>

@@ -51,7 +51,10 @@ class ResearchProjectController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|min:10',
+            'abstract' => 'nullable|string|max:1000',
             'category' => 'required|string|max:100',
+            'field_of_study' => 'nullable|string|max:100',
+            'keywords' => 'nullable|string|max:500',
             'file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
@@ -59,8 +62,15 @@ class ResearchProjectController extends Controller
             'user_id' => auth()->id(),
             'title' => $validated['title'],
             'description' => $validated['description'],
+            'abstract' => $validated['abstract'] ?? null,
             'category' => $validated['category'],
+            'field_of_study' => $validated['field_of_study'] ?? null,
+            'keywords' => $validated['keywords'] ?? null,
             'status' => 'pending',
+            'submission_date' => now(),
+            'view_count' => 0,
+            'views_count' => 0,
+            'downloads_count' => 0,
         ]);
 
         if ($request->hasFile('file')) {
@@ -77,7 +87,10 @@ class ResearchProjectController extends Controller
      */
     public function show(ResearchProject $researchProject): View
     {
+        // Increment view counts
         $researchProject->increment('view_count');
+        $researchProject->increment('views_count');
+        
         $researchProject->load('user', 'assignedFaculty', 'reviews');
 
         return view('research.show', ['project' => $researchProject]);
@@ -103,10 +116,26 @@ class ResearchProjectController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|min:10',
+            'abstract' => 'nullable|string|max:1000',
             'category' => 'required|string|max:100',
+            'field_of_study' => 'nullable|string|max:100',
+            'keywords' => 'nullable|string|max:500',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        $researchProject->update($validated);
+        $researchProject->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'abstract' => $validated['abstract'] ?? null,
+            'category' => $validated['category'],
+            'field_of_study' => $validated['field_of_study'] ?? null,
+            'keywords' => $validated['keywords'] ?? null,
+        ]);
+
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('research-projects', 'public');
+            $researchProject->update(['file_path' => $path]);
+        }
 
         return redirect()->route('research.show', $researchProject)
             ->with('success', 'Project updated successfully!');
@@ -134,6 +163,15 @@ class ResearchProjectController extends Controller
             abort(404, 'File not found');
         }
 
-        return response()->download(storage_path('app/public/' . $researchProject->file_path));
+        // Increment download count
+        $researchProject->increment('downloads_count');
+
+        $filePath = storage_path('app/public/' . $researchProject->file_path);
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found on server');
+        }
+
+        return response()->download($filePath, basename($researchProject->file_path));
     }
 }

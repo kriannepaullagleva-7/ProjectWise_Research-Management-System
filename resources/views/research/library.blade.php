@@ -48,10 +48,10 @@
                 $colors = $statusColors[$project->status] ?? ['bg' => '#e5e7eb', 'text' => '#374151'];
             @endphp
 
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+            <!-- <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                 <span style="background-color: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 500;">
                     {{ $project->status_label }}
-                </span>
+                </span> -->
                 <span style="background: #f3f4f6; color: #6b7280; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem;">
                     {{ $project->category }}
                 </span>

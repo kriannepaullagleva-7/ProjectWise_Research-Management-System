@@ -37,9 +37,9 @@
                     <span class="badge badge-{{ ['approved'=>'approved','pending'=>'pending','rejected'=>'rejected','under_review'=>'review','revision_needed'=>'revision','draft'=>'draft'][$p->status] ?? 'draft' }}">{{ $p->status_label }}</span>
                 </td>
                 <td style="font-size:.8125rem;">
-                    @if($p->latestFeedback)
-                    <span style="color:var(--ink-soft);">{{ Str::limit($p->latestFeedback->comment, 50) }}</span>
-                    <div style="font-size:.7rem;color:var(--ink-mute);">by {{ $p->latestFeedback->faculty->full_name }}</div>
+                    @if($p->latestReview)
+                    <span style="color:var(--ink-soft);">{{ Str::limit($p->latestReview->feedback, 50) }}</span>
+                    <div style="font-size:.7rem;color:var(--ink-mute);">by {{ $p->latestReview->faculty->full_name }}</div>
                     @else
                     <span style="color:var(--ink-mute);">—</span>
                     @endif

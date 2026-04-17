@@ -54,6 +54,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:student,faculty',
             'department' => 'nullable|string|max:255',
+            'student_id' => 'nullable|string|max:255',
         ]);
 
         $user = \App\Models\User::create([

@@ -25,6 +25,9 @@ class ResearchProject extends Model
         'file_path',
         'submission_date',
         'approval_date',
+        'view_count',
+        'views_count',
+        'downloads_count',
     ];
 
     protected $appends = ['status_label'];
@@ -54,6 +57,14 @@ class ResearchProject extends Model
     }
 
     /**
+     * Get the latest review for this project
+     */
+    public function latestReview()
+    {
+        return $this->reviews()->latest()->first();
+    }
+
+    /**
      * Get human-readable status label
      */
     public function getStatusLabelAttribute(): string
@@ -73,5 +84,43 @@ class ResearchProject extends Model
     public function getUserFullNameAttribute(): string
     {
         return $this->user->full_name ?? $this->user->name;
+    }
+
+    /**
+     * Get the original file name from file path
+     */
+    public function getFileOriginalNameAttribute(): string
+    {
+        if (!$this->file_path) {
+            return '';
+        }
+        return basename($this->file_path);
+    }
+
+    /**
+     * Get the formatted file size
+     */
+    public function getFileSizeFormattedAttribute(): string
+    {
+        if (!$this->file_path) {
+            return '';
+        }
+        
+        $filePath = storage_path('app/public/' . $this->file_path);
+        if (!file_exists($filePath)) {
+            return '';
+        }
+        
+        $size = filesize($filePath);
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $size = $size / 1024;
+        $unitIndex = 1;
+        
+        while ($size >= 1024 && $unitIndex < count($units) - 1) {
+            $size /= 1024;
+            $unitIndex++;
+        }
+        
+        return round($size, 2) . ' ' . $units[$unitIndex];
     }
 }
