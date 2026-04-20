@@ -240,23 +240,27 @@
                 <input type="file" name="avatar" id="avatarFormInput" accept="image/*" style="display:none;">
 
                 <div class="pf-form-grid">
-                    <div class="pf-field">
-                        <label class="pf-label">First name</label>
-                        <input class="pf-input" type="text" name="first_name"
-                               value="{{ old('first_name', $user->first_name) }}" required>
-                    </div>
-
-                    <div class="pf-field">
-                        <label class="pf-label">Last name</label>
-                        <input class="pf-input" type="text" name="last_name"
-                               value="{{ old('last_name', $user->last_name) }}" required>
-                    </div>
-
                     <div class="pf-field full">
                         <label class="pf-label">Email address</label>
                         <input class="pf-input" type="email" name="email"
-                               value="{{ old('email', $user->email) }}" required>
-                        @error('email')
+                               value="{{ $user->email }}" disabled style="background-color: #f3f4f6; color: #6b7280;">
+                        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Email cannot be changed</p>
+                    </div>
+
+                    <div class="pf-field full">
+                        <label class="pf-label">Display Name</label>
+                        <input class="pf-input" type="text" name="name"
+                               value="{{ old('name', $user->name) }}" required>
+                        @error('name')
+                            <p class="pf-error">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="pf-field full">
+                        <label class="pf-label">Full Name</label>
+                        <input class="pf-input" type="text" name="full_name"
+                               value="{{ old('full_name', $user->full_name) }}">
+                        @error('full_name')
                             <p class="pf-error">{{ $message }}</p>
                         @enderror
                     </div>
@@ -271,8 +275,13 @@
                     <div class="pf-field">
                         <label class="pf-label">Student / Faculty ID</label>
                         <input class="pf-input" type="text" name="student_id"
-                               value="{{ old('student_id', $user->student_id) }}"
+                               value="{{ old('student_id', $user->student_id ?? '') }}"
                                placeholder="e.g. 2024-00123">
+                    </div>
+
+                    <div class="pf-field full">
+                        <label class="pf-label">Bio</label>
+                        <textarea class="pf-input" name="bio" rows="4" placeholder="Tell others about yourself...">{{ old('bio', $user->bio) }}</textarea>
                     </div>
                 </div>
             </div>

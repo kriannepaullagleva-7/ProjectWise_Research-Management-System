@@ -7,20 +7,22 @@ use App\Models\FacultyReview;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class FacultyController extends Controller
 {
-    /**
-     * Show the faculty explorer (review queue)
-     */
+    use AuthorizesRequests;
+
     public function explorer(): View
     {
-        $projects = ResearchProject::where('status', '!=', 'rejected')
+        $projects = ResearchProject::whereIn('status', ['pending', 'under_review'])
             ->where(function ($query) {
                 $query->whereNull('assigned_faculty_id')
-                    ->orWhere('assigned_faculty_id', auth()->id());
+                    ->orWhere('assigned_faculty_id', Auth::id());
             })
             ->with('user', 'reviews')
+            ->latest()
             ->paginate(15);
 
         return view('faculty.explorer', [
@@ -37,11 +39,11 @@ class FacultyController extends Controller
 
         // Assign to current faculty if not already assigned
         if (!$researchProject->assigned_faculty_id) {
-            $researchProject->update(['assigned_faculty_id' => auth()->id()]);
+            $researchProject->update(['assigned_faculty_id' => Auth::id()]);
         }
 
         $existingReview = FacultyReview::where('research_project_id', $researchProject->id)
-            ->where('faculty_id', auth()->id())
+            ->where('faculty_id', Auth::id())
             ->first();
 
         return view('faculty.review', [
@@ -51,38 +53,46 @@ class FacultyController extends Controller
     }
 
     /**
-     * Submit feedback for a project
+     * Submit feedback for a project - saves review and updates project status in database
      */
     public function submitFeedback(ResearchProject $researchProject, Request $request): RedirectResponse
     {
         $this->authorize('review', $researchProject);
 
         $validated = $request->validate([
-            'feedback' => 'required|string|min:10',
+            'feedback' => 'required|string|min:10|max:2000',
             'recommendation' => 'required|in:approve,reject,revise',
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
 
+        // Save or update review in database
         $review = FacultyReview::updateOrCreate(
             [
                 'research_project_id' => $researchProject->id,
-                'faculty_id' => auth()->id(),
+                'faculty_id' => Auth::id(),
             ],
-            $validated
+            [
+                'feedback' => $validated['feedback'],
+                'recommendation' => $validated['recommendation'],
+                'rating' => $validated['rating'],
+            ]
         );
 
-        // Update project status based on recommendation
-        if ($validated['recommendation'] === 'approve') {
-            $researchProject->update(['status' => 'approved']);
-        } elseif ($validated['recommendation'] === 'reject') {
-            $researchProject->update(['status' => 'rejected']);
-        } else {
-            $researchProject->update(['status' => 'under_review']);
-        }
-
-        $researchProject->update(['reviewer_feedback' => $validated['feedback']]);
+        // Update project status and feedback in database
+        $statusMap = [
+            'approve' => 'approved',
+            'reject' => 'rejected',
+            'revise' => 'under_review',
+        ];
+        
+        $researchProject->update([
+            'status' => $statusMap[$validated['recommendation']] ?? 'under_review',
+            'reviewer_feedback' => $validated['feedback'],
+            'assigned_faculty_id' => Auth::id(),
+            'approval_date' => $validated['recommendation'] === 'approve' ? now() : null,
+        ]);
 
         return redirect()->route('faculty.explorer')
-            ->with('success', 'Review submitted successfully!');
+            ->with('success', 'Review submitted successfully! Feedback and project status saved to database.');
     }
 }

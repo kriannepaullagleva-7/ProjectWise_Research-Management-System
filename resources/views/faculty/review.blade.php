@@ -2,6 +2,19 @@
 @section('title', 'Review Project - ' . $project->title)
 
 @section('content')
+<style>
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-block;
+    }
+    .status-pending { background-color: #fef3c7; color: #92400e; }
+    .status-under_review { background-color: #dbeafe; color: #1e40af; }
+    .status-approved { background-color: #d1fae5; color: #065f46; }
+    .status-rejected { background-color: #fee2e2; color: #7f1d1d; }
+</style>
 <div style="max-width: 900px; margin: 0 auto;">
     <!-- Back Button -->
     <div style="margin-bottom: 2rem;">
@@ -24,16 +37,7 @@
             </div>
             <div>
                 <div style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem;">Status</div>
-                @php
-                    $statusColors = [
-                        'pending' => ['bg' => '#fef3c7', 'text' => '#92400e'],
-                        'under_review' => ['bg' => '#dbeafe', 'text' => '#1e40af'],
-                        'approved' => ['bg' => '#d1fae5', 'text' => '#065f46'],
-                        'rejected' => ['bg' => '#fee2e2', 'text' => '#7f1d1d'],
-                    ];
-                    $colors = $statusColors[$project->status] ?? ['bg' => '#e5e7eb', 'text' => '#374151'];
-                @endphp
-                <span style="background-color: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; display: inline-block;">
+                <span class="status-badge status-{{ $project->status }}">
                     {{ $project->status_label }}
                 </span>
             </div>

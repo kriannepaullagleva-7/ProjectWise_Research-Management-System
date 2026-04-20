@@ -11,7 +11,13 @@
             @method('PUT')
 
             <div style="margin-bottom: 1.5rem;">
-                <label for="name" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Name</label>
+                <label for="email" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Email Address</label>
+                <input type="email" name="email" id="email" value="{{ $user->email }}" disabled style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: #f3f4f6; color: #6b7280;">
+                <p style="color: #6b7280; margin-top: 0.25rem; font-size: 0.875rem;">Email cannot be changed</p>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="name" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Display Name</label>
                 <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
                 @error('name')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
             </div>
@@ -22,15 +28,22 @@
                 @error('full_name')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
             </div>
 
-            <div style="margin-bottom: 1.5rem;">
-                <label for="department" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Department</label>
-                <input type="text" name="department" id="department" value="{{ old('department', $user->department) }}" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-                @error('department')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label for="department" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Department</label>
+                    <input type="text" name="department" id="department" value="{{ old('department', $user->department) }}" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+                    @error('department')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label for="student_id" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Student/Faculty ID</label>
+                    <input type="text" name="student_id" id="student_id" value="{{ old('student_id', $user->student_id ?? '') }}" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+                    @error('student_id')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
+                </div>
             </div>
 
             <div style="margin-bottom: 1.5rem;">
                 <label for="bio" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Bio</label>
-                <textarea name="bio" id="bio" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; resize: vertical;">{{ old('bio', $user->bio) }}</textarea>
+                <textarea name="bio" id="bio" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; resize: vertical;" placeholder="Tell others about yourself...">{{ old('bio', $user->bio) }}</textarea>
                 @error('bio')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
             </div>
 

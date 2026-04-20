@@ -246,6 +246,7 @@
 {{-- Sidebar --}}
 <aside id="sidebar" :class="{ 'open': sidebarOpen }">
     <div class="logo">
+        <img src="{{ asset('images/rms-logo.png') }}" alt="ProjectWise Logo" style="width: 100%; max-width: 150px; height: auto; margin-bottom: 0.75rem; border-radius: 8px;">
         <div class="logo-text">ProjectWise</div>
         <div class="logo-sub">Research Management System</div>
     </div>
@@ -359,7 +360,7 @@
                     <div style="padding:.875rem 1.125rem;border-bottom:1px solid var(--border);font-size:.8125rem;font-weight:600;color:var(--ink);">Notifications</div>
                     <div style="max-height:320px;overflow-y:auto;">
                         @forelse(auth()->user()->notifications()->latest()->take(8)->get() as $notif)
-                        <div style="padding:.75rem 1.125rem;border-bottom:1px solid #f9fafb;display:flex;gap:.65rem;align-items:flex-start;{{ $notif->read_at ? '' : 'background:#f0f4ff;' }}">
+                        <!-- <div style="padding:.75rem 1.125rem;border-bottom:1px solid #f9fafb;display:flex;gap:.65rem;align-items:flex-start;{{ $notif->read_at ? '' : 'background:#f0f4ff;' }}"> -->
                             @if(!$notif->read_at)<span class="notif-dot" style="margin-top:.35rem;"></span>@endif
                             <div>
                                 <div style="font-size:.8125rem;color:var(--ink-soft);">{{ $notif->data['message'] ?? 'New notification' }}</div>

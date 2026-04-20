@@ -2,6 +2,15 @@
 @section('title', 'Faculty Review Queue')
 
 @section('content')
+<style>
+[data-border-color] {
+    border-left: 4px solid;
+}
+[data-status-bg] {
+    background-color: inherit;
+    color: inherit;
+}
+</style>
 <div style="margin-bottom: 2rem;">
     <h1 style="margin: 0; font-size: 1.875rem; font-weight: 700;">Review Queue</h1>
     <p style="margin: 0.5rem 0 0 0; color: #6b7280;">Manage and review all research project submissions</p>
@@ -42,8 +51,15 @@
     @foreach($projects as $project)
     @php
         $borderColor = $project->status === 'pending' ? '#f97316' : '#2563eb';
+        $statusColors = [
+            'pending' => ['bg' => '#fef3c7', 'text' => '#92400e'],
+            'under_review' => ['bg' => '#dbeafe', 'text' => '#1e40af'],
+            'approved' => ['bg' => '#d1fae5', 'text' => '#065f46'],
+            'rejected' => ['bg' => '#fee2e2', 'text' => '#7f1d1d'],
+        ];
+        $colors = $statusColors[$project->status] ?? ['bg' => '#e5e7eb', 'text' => '#374151'];
     @endphp
-    <div style="background: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid {{ $borderColor }};">
+    <div style="background: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" data-border-color="{{ $borderColor }}">
         <div style="display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: start;">
             <div>
                 <h3 style="margin: 0 0 0.5rem 0; font-size: 1.125rem; font-weight: 600;">
@@ -66,16 +82,7 @@
                 </p>
             </div>
             <div style="text-align: right;">
-                @php
-                    $statusColors = [
-                        'pending' => ['bg' => '#fef3c7', 'text' => '#92400e'],
-                        'under_review' => ['bg' => '#dbeafe', 'text' => '#1e40af'],
-                        'approved' => ['bg' => '#d1fae5', 'text' => '#065f46'],
-                        'rejected' => ['bg' => '#fee2e2', 'text' => '#7f1d1d'],
-                    ];
-                    $colors = $statusColors[$project->status] ?? ['bg' => '#e5e7eb', 'text' => '#374151'];
-                @endphp
-                <span style="background-color: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 600; display: inline-block; margin-bottom: 1rem;">
+                <span style="padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 600; display: inline-block; margin-bottom: 1rem;" data-status-bg="{{ $colors['bg'] }}" data-status-text="{{ $colors['text'] }}" data-status-color="true">
                     {{ $project->status_label }}
                 </span>
                 <div>
@@ -101,4 +108,14 @@
     {{ $projects->links() }}
 </div>
 @endif
+
+<script>
+document.querySelectorAll('[data-border-color]').forEach(el => {
+    el.style.borderLeftColor = el.dataset.borderColor;
+});
+document.querySelectorAll('[data-status-color="true"]').forEach(el => {
+    el.style.backgroundColor = el.dataset.statusBg;
+    el.style.color = el.dataset.statusText;
+});
+</script>
 @endsection

@@ -6,20 +6,75 @@ use App\Models\ResearchProject;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * ResearchProjectController - Manage research project CRUD operations
+ * @method void authorize(string $ability, mixed $arguments)
+ */
 class ResearchProjectController extends Controller
 {
     /**
      * Display a listing of research projects
      */
-    public function index(): View
+    public function index(\Illuminate\Http\Request $request): View
     {
-        $projects = ResearchProject::where('status', 'approved')
-            ->with('user', 'assignedFaculty')
-            ->latest()
-            ->paginate(12);
+        $query = ResearchProject::where('status', 'approved')
+            ->with('user', 'assignedFaculty');
 
-        return view('research.index', ['projects' => $projects]);
+        // Handle search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('abstract', 'like', '%' . $search . '%')
+                  ->orWhere('keywords', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function ($q) use ($search) {
+                      $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('full_name', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Handle category filter
+        if ($request->filled('category')) {
+            $query->where('category', $request->input('category'));
+        }
+
+        // Handle sort
+        $sort = $request->input('sort', 'latest');
+        if ($sort === 'oldest') {
+            $query->oldest();
+        } elseif ($sort === 'views') {
+            $query->orderBy('views_count', 'desc');
+        } elseif ($sort === 'downloads') {
+            $query->orderBy('downloads_count', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        $projects = $query->paginate(12)
+            ->appends($request->query());
+
+        // Get list of all categories for filter dropdown
+        $categories = [
+            'Computer Science & IT',
+            'Engineering',
+            'Natural Sciences',
+            'Social Sciences',
+            'Humanities',
+            'Business & Economics',
+            'Health & Medicine',
+            'Education',
+            'Environmental Science',
+            'Mathematics',
+            'Other'
+        ];
+
+        return view('research.index', [
+            'projects' => $projects,
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -27,7 +82,7 @@ class ResearchProjectController extends Controller
      */
     public function myProjects(): View
     {
-        $projects = ResearchProject::where('user_id', auth()->id())
+        $projects = ResearchProject::where('user_id', Auth::id())
             ->with('assignedFaculty', 'reviews')
             ->latest()
             ->paginate(10);
@@ -50,24 +105,24 @@ class ResearchProjectController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string|min:10',
-            'abstract' => 'nullable|string|max:1000',
+            'abstract' => 'required|string|min:10|max:2000',
             'category' => 'required|string|max:100',
             'field_of_study' => 'nullable|string|max:100',
             'keywords' => 'nullable|string|max:500',
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:20480',
         ]);
 
         $project = ResearchProject::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'title' => $validated['title'],
-            'description' => $validated['description'],
-            'abstract' => $validated['abstract'] ?? null,
+            'description' => $validated['abstract'],
+            'abstract' => $validated['abstract'],
             'category' => $validated['category'],
             'field_of_study' => $validated['field_of_study'] ?? null,
             'keywords' => $validated['keywords'] ?? null,
             'status' => 'pending',
             'submission_date' => now(),
+            'approval_date' => null,
             'view_count' => 0,
             'views_count' => 0,
             'downloads_count' => 0,
@@ -93,7 +148,7 @@ class ResearchProjectController extends Controller
         
         $researchProject->load('user', 'assignedFaculty', 'reviews');
 
-        return view('research.show', ['project' => $researchProject]);
+        return view('research.show', compact('researchProject'));
     }
 
     /**
@@ -103,7 +158,7 @@ class ResearchProjectController extends Controller
     {
         $this->authorize('update', $researchProject);
 
-        return view('research.edit', ['project' => $researchProject]);
+        return view('research.create', ['researchProject' => $researchProject]);
     }
 
     /**
@@ -115,18 +170,17 @@ class ResearchProjectController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string|min:10',
-            'abstract' => 'nullable|string|max:1000',
+            'abstract' => 'required|string|min:10|max:2000',
             'category' => 'required|string|max:100',
             'field_of_study' => 'nullable|string|max:100',
             'keywords' => 'nullable|string|max:500',
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:20480',
         ]);
 
         $researchProject->update([
             'title' => $validated['title'],
-            'description' => $validated['description'],
-            'abstract' => $validated['abstract'] ?? null,
+            'description' => $validated['abstract'],
+            'abstract' => $validated['abstract'],
             'category' => $validated['category'],
             'field_of_study' => $validated['field_of_study'] ?? null,
             'keywords' => $validated['keywords'] ?? null,
