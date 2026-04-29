@@ -43,7 +43,13 @@
                 </td>
                 <td style="font-size:.8125rem;color:#6b7280;">{{ $u->email }}</td>
                 <td>
-                    <span style="background: {{ $u->role === 'admin' ? '#dbeafe' : ($u->role === 'faculty' ? '#fef3c7' : '#e0e7ff') }}; color: {{ $u->role === 'admin' ? '#1e40af' : ($u->role === 'faculty' ? '#92400e' : '#3730a3') }}; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; text-transform: capitalize;">{{ $u->role }}</span>
+                    @if($u->role === 'admin')
+                        <span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; text-transform: capitalize;">{{ $u->role }}</span>
+                    @elseif($u->role === 'faculty')
+                        <span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; text-transform: capitalize;">{{ $u->role }}</span>
+                    @else
+                        <span style="background: #e0e7ff; color: #3730a3; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; text-transform: capitalize;">{{ $u->role }}</span>
+                    @endif
                 </td>
                 <td style="font-size:.8125rem;color:#6b7280;">{{ $u->department ?? '—' }}</td>
                 <td style="font-size:.8125rem;color:#6b7280;">{{ $u->created_at->format('M d, Y') }}</td>
@@ -56,12 +62,21 @@
                 </td>
                 <td>
                     @if($u->id !== auth()->id())
-                    <form method="POST" action="{{ route('admin.users.toggle', $u) }}" style="display:inline;">
-                        @csrf
-                        <button type="submit" style="background: #fee2e2; color: #7f1d1d; padding: 0.35rem 0.75rem; border: none; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 500; cursor: pointer;" onclick="return confirm('Are you sure?')">
-                            Toggle
-                        </button>
-                    </form>
+                    <div style="display:flex;gap:.5rem;">
+                        <form method="POST" action="{{ route('admin.users.toggle', $u) }}" style="display:inline;">
+                            @csrf
+                            <button type="submit" style="background: #fee2e2; color: #7f1d1d; padding: 0.35rem 0.75rem; border: none; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 500; cursor: pointer;" onclick="return confirm('Are you sure?')">
+                                Toggle
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.users.delete', $u) }}" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" style="background: #dc2626; color: #fff; padding: 0.35rem 0.75rem; border: none; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 500; cursor: pointer;" onclick="return confirm('Delete this user permanently? This action cannot be undone.')">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
                     @else
                     <span style="font-size:.75rem;color:#6b7280;">Current</span>
                     @endif

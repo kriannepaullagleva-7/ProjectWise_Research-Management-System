@@ -2,6 +2,8 @@
 @section('title', 'Create Account')
 
 @section('content')
+<div class="auth-page-wrap">
+<div class="auth-container">
 <div class="auth-card">
     <div class="auth-header">
         <img src="{{ asset('images/rms-logo.png') }}" alt="ProjectWise Logo" style="width: 60px; height: auto; margin: 0 auto 0.5rem; border-radius: 8px;">
@@ -82,5 +84,7 @@
     <p style="text-align: center; font-size: 0.875rem; color: var(--ink-mute); margin-top: 1.5rem;">
         Already have an account? <a href="{{ route('login') }}" class="auth-link">Sign in</a>
     </p>
+</div>
+</div>
 </div>
 @endsection

@@ -88,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
         Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
         Route::post('/users/{user}/toggle', [AdminController::class, 'toggleUser'])->name('users.toggle');
+        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
 
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
         Route::get('/reports/export', [AdminController::class, 'exportReport'])->name('reports.export');

@@ -30,7 +30,16 @@ class ResearchProject extends Model
         'downloads_count',
     ];
 
-    protected $appends = ['status_label'];
+    protected $casts = [
+    'submission_date' => 'datetime',
+    'approval_date' => 'datetime',
+    ];
+
+    protected $appends = [
+    'status_label',
+    'submission_date_formatted',
+    'approval_date_formatted',
+    ];
 
     /**
      * Get the user that owns this project
@@ -40,6 +49,27 @@ class ResearchProject extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getSubmissionDateFormattedAttribute()
+    {
+        try {
+            return $this->submission_date
+                ? \Carbon\Carbon::parse($this->submission_date)->format('F d, Y')
+                : ($this->created_at ? $this->created_at->format('F d, Y') : '');
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    public function getApprovalDateFormattedAttribute()
+    {
+        try {
+            return $this->approval_date
+                ? \Carbon\Carbon::parse($this->approval_date)->format('F d, Y')
+                : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
     /**
      * Get the assigned faculty member
      */

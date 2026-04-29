@@ -50,17 +50,24 @@ class ProfileController extends Controller
             'full_name' => 'nullable|string|max:255',
             'department' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:500',
-            'avatar_url' => 'nullable|url|max:500',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'student_id' => 'nullable|string|max:100',
         ]);
 
         // Save all validated data to database
         /** @var User $user */
         $user = Auth::user();
+        
+        // Handle avatar file upload — store relative path for use with asset('storage/...')
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar_url'] = 'storage/' . $avatarPath;
+        }
+        
         $user->update($validated);
 
         return redirect()->route('profile.show')
-            ->with('success', 'Profile updated successfully! All changes saved to database.');
+            ->with('profile_updated', true);
     }
 
     /**
@@ -72,7 +79,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         
         $request->validate([
-            'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
+            'current_password' => ['required', function ($_attribute, $value, $fail) use ($user) {
                 if (!Hash::check($value, $user->password)) {
                     $fail('The current password is incorrect.');
                 }
@@ -86,6 +93,6 @@ class ProfileController extends Controller
         ]);
 
         return redirect()->route('profile.show')
-            ->with('success', 'Password updated successfully! New password saved to database.');
+            ->with('password_updated', true);
     }
 }

@@ -1,163 +1,214 @@
-@php
-    use Illuminate\Support\Str;
-@endphp
 @extends('layouts.app')
 @section('title', 'Faculty Dashboard')
 @section('page-title', 'Faculty Dashboard')
 
 @section('content')
-<!-- Statistics Cards -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-bottom:2rem;">
-    <!-- Pending Reviews Card -->
-    <div class="stat-card" style="background:linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Pending Reviews</div>
-        <div style="font-size: 2rem; font-weight: 700;">{{ $stats['pending_reviews'] }}</div>
-        <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">Awaiting assignment</div>
-    </div>
+<style>
+    .fc-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+    @media (max-width: 900px) { .fc-stats { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) {
+        .fc-stat { min-height: 100px; padding: 1.1rem 1.25rem; }
+        .fc-stat-val { font-size: 1.65rem; }
+    }
+    @media (max-width: 400px) {
+        .fc-stats { grid-template-columns: 1fr 1fr; }
+        .fc-stat { min-height: 85px; padding: .875rem 1rem; }
+        .fc-stat-val { font-size: 1.45rem; }
+    }
 
-    <!-- Under Review Card -->
-    <div class="stat-card" style="background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Under Review</div>
-        <div style="font-size: 2rem; font-weight: 700;">{{ $stats['under_review'] }}</div>
-        <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">In progress reviews</div>
-    </div>
+    .fc-stat {
+        border-radius: 14px;
+        padding: 1.35rem 1.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 120px;
+    }
+    .fc-stat::after {
+        content: '';
+        position: absolute;
+        right: -20px; top: -20px;
+        width: 90px; height: 90px;
+        background: rgba(255,255,255,.12);
+        border-radius: 50%;
+    }
+    .fc-stat-label  { font-size: .75rem; opacity: .9; font-weight: 500; }
+    .fc-stat-val    { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .fc-stat-sub    { font-size: .72rem; opacity: .75; }
+    .fc-stat-bottom { display: flex; align-items: flex-end; justify-content: space-between; }
 
-    <!-- My Reviews Done Card -->
-    <div class="stat-card" style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Reviews Completed</div>
-        <div style="font-size: 2rem; font-weight: 700;">{{ $stats['reviewed_total'] }}</div>
-        <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">Total completed</div>
-    </div>
+    .fc-section { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
+    .fc-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.125rem 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .fc-section-head h3 { font-family: 'DM Sans', sans-serif; font-size: .9375rem; font-weight: 700; color: #0f172a; margin: 0; }
 
-    <!-- Total Approved Card -->
-    <div class="stat-card" style="background:linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Projects Approved</div>
-        <div style="font-size: 2rem; font-weight: 700;">{{ $stats['approved'] }}</div>
-        <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">Successfully approved</div>
+    .fc-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f8fafc;
+        transition: background .1s;
+    }
+    .fc-row:last-child { border-bottom: none; }
+    .fc-row:hover { background: #f8fafc; }
+    .fc-row-info { flex: 1; min-width: 0; }
+    .fc-row-title { font-size: .875rem; font-weight: 600; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; display: block; margin-bottom: .15rem; }
+    .fc-row-title:hover { color: #2563eb; }
+    .fc-row-meta { font-size: .75rem; color: #94a3b8; display: flex; gap: .65rem; flex-wrap: wrap; }
+
+    .sp-pill {
+        display: inline-flex;
+        padding: .2rem .65rem;
+        border-radius: 99px;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .02em;
+        white-space: nowrap;
+    }
+    .sp-pending      { background:#fef3c7; color:#92400e; }
+    .sp-under_review { background:#e0e7ff; color:#3730a3; }
+    .sp-approved     { background:#d1fae5; color:#065f46; }
+    .sp-rejected     { background:#fee2e2; color:#7f1d1d; }
+
+    .fc-review-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        background: #2563eb;
+        color: #fff;
+        padding: .35rem .85rem;
+        border-radius: 7px;
+        font-size: .775rem;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background .1s;
+    }
+    .fc-review-btn:hover { background: #1d4ed8; }
+
+    .fc-empty { padding: 3rem 2rem; text-align: center; color: #94a3b8; }
+    .fc-empty svg { margin: 0 auto .75rem; display: block; opacity: .2; }
+    .fc-empty p { font-size: .9rem; color: #64748b; }
+</style>
+
+{{-- Stats --}}
+<div class="fc-stats">
+    <div class="fc-stat" style="background:linear-gradient(135deg,#f97316,#ea580c);">
+        <div class="fc-stat-label">Pending Reviews</div>
+        <div class="fc-stat-bottom">
+            <div class="fc-stat-sub">Awaiting assignment</div>
+            <div class="fc-stat-val">{{ $stats['pending_reviews'] }}</div>
+        </div>
+    </div>
+    <div class="fc-stat" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+        <div class="fc-stat-label">Under Review</div>
+        <div class="fc-stat-bottom">
+            <div class="fc-stat-sub">In progress</div>
+            <div class="fc-stat-val">{{ $stats['under_review'] }}</div>
+        </div>
+    </div>
+    <div class="fc-stat" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
+        <div class="fc-stat-label">Reviews Done</div>
+        <div class="fc-stat-bottom">
+            <div class="fc-stat-sub">Total completed</div>
+            <div class="fc-stat-val">{{ $stats['reviewed_total'] }}</div>
+        </div>
+    </div>
+    <div class="fc-stat" style="background:linear-gradient(135deg,#059669,#047857);">
+        <div class="fc-stat-label">Approved</div>
+        <div class="fc-stat-bottom">
+            <div class="fc-stat-sub">Successfully approved</div>
+            <div class="fc-stat-val">{{ $stats['approved'] }}</div>
+        </div>
     </div>
 </div>
 
-<!-- Submissions Awaiting Review Section -->
-<div style="background: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb;">
-        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">Submissions Awaiting Review</h3>
-        <a href="{{ route('faculty.explorer') }}" style="background: #2563eb; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: background 0.2s;">Review Queue</a>
+{{-- Assigned Projects --}}
+<div class="fc-section">
+    <div class="fc-section-head">
+        <h3>Submissions Assigned to You</h3>
+        <a href="{{ route('faculty.explorer') }}" class="btn btn-primary btn-sm">Review Queue</a>
     </div>
 
     @if($assignedProjects->isEmpty())
-        <div style="padding:3rem;text-align:center;color:#6b7280;font-size:.875rem;">
-            <svg style="width: 3rem; height: 3rem; margin: 0 auto 1rem; opacity: 0.3;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        <div class="fc-empty">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <p>No pending submissions at this time. Great work! 🎉</p>
+            <p>No pending submissions assigned to you. Great work! 🎉</p>
         </div>
     @else
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
-                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem;">Title</th>
-                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem;">Student</th>
-                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem;">Category</th>
-                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem;">Status</th>
-                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem;">Submitted</th>
-                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($assignedProjects as $p)
-                    <tr style="border-bottom: 1px solid #e5e7eb; transition: background 0.1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
-                        <td style="padding: 1rem; font-weight: 500; color: #111827;">
-                            <a href="{{ route('research.show', $p) }}" style="color: #2563eb; text-decoration: none;">
-                                {{ Str::limit($p->title, 45) }}
-                            </a>
-                        </td>
-                        <td style="padding: 1rem; font-size: 0.8125rem; color: #6b7280;">
-                            {{ $p->user->full_name ?? $p->user->name }}
-                        </td>
-                        <td style="padding: 1rem; font-size: 0.8125rem; color: #6b7280;">
-                            <span style="background: #e0e7ff; color: #4f46e5; padding: 0.25rem 0.75rem; border-radius: 0.25rem;">
-                                {{ $p->category }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem;">
-                            @php
-                                $statusColors = [
-                                    'pending' => ['bg' => '#fef3c7', 'text' => '#92400e'],
-                                    'under_review' => ['bg' => '#dbeafe', 'text' => '#1e40af'],
-                                    'approved' => ['bg' => '#d1fae5', 'text' => '#065f46'],
-                                    'rejected' => ['bg' => '#fee2e2', 'text' => '#7f1d1d'],
-                                ];
-                                $colors = $statusColors[$p->status] ?? ['bg' => '#e5e7eb', 'text' => '#374151'];
-                            @endphp
-                            <span data-status-badge="true" data-bg="{{ $colors['bg'] }}" data-text="{{ $colors['text'] }}" style="padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; display: inline-block;">
-                                {{ $p->status_label }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem; font-size: 0.8125rem; color: #6b7280;">
-                            {{ $p->created_at->format('M d, Y') }}
-                        </td>
-                        <td style="padding: 1rem; text-align: center;">
-                            @if(in_array($p->status, ['pending','under_review']))
-                                <a href="{{ route('faculty.review', $p) }}" style="background: #2563eb; color: white; padding: 0.375rem 0.75rem; border-radius: 0.375rem; text-decoration: none; font-size: 0.75rem; font-weight: 500; display: inline-block; transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Review</a>
-                            @else
-                                <a href="{{ route('research.show', $p) }}" style="background: #e5e7eb; color: #374151; padding: 0.375rem 0.75rem; border-radius: 0.375rem; text-decoration: none; font-size: 0.75rem; font-weight: 500; display: inline-block; transition: background 0.2s;" onmouseover="this.style.background='#d1d5db'" onmouseout="this.style.background='#e5e7eb'">View</a>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        @foreach($assignedProjects as $p)
+        <div class="fc-row">
+            <div class="fc-row-info">
+                <a href="{{ route('research.show', $p) }}" class="fc-row-title">
+                    {{ \Illuminate\Support\Str::limit($p->title, 60) }}
+                </a>
+                <div class="fc-row-meta">
+                    <span>{{ $p->user->full_name ?? $p->user->name }}</span>
+                    <span>·</span>
+                    <span>{{ $p->category }}</span>
+                    <span>·</span>
+                    <span>{{ $p->created_at->format('M d, Y') }}</span>
+                </div>
+            </div>
+            <span class="sp-pill sp-{{ $p->status }}">{{ $p->status_label }}</span>
+            @if(in_array($p->status, ['pending','under_review']))
+            <a href="{{ route('faculty.review', $p) }}" class="fc-review-btn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Review
+            </a>
+            @else
+            <a href="{{ route('research.show', $p) }}" style="font-size:.775rem;color:#64748b;padding:.35rem .75rem;border:1px solid #e5e7eb;border-radius:7px;text-decoration:none;">View</a>
+            @endif
         </div>
+        @endforeach
     @endif
 </div>
 
-<!-- Quick Stats Section -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:1rem;">
-    <!-- Recent Activity Card -->
-    <div style="background: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">Quick Stats</h4>
-        <div>
-            <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
-                <span style="color: #6b7280;">Total Submissions Assigned</span>
-                <span style="font-weight: 600; color: #111827;">{{ $stats['total_submissions'] ?? 0 }}</span>
+{{-- Quick Info --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+    <div class="fc-section">
+        <div class="fc-section-head"><h3>Quick Stats</h3></div>
+        <div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.65rem;font-size:.875rem;">
+            <div style="display:flex;justify-content:space-between;">
+                <span style="color:#6b7280;">Total Assigned</span>
+                <span style="font-weight:600;color:#111827;">{{ $stats['total_submissions'] }}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.75rem 0;">
-                <span style="color: #6b7280;">Approval Rate</span>
-                <span style="font-weight: 600; color: #059669;">
+            <div style="display:flex;justify-content:space-between;">
+                <span style="color:#6b7280;">Approval Rate</span>
+                <span style="font-weight:600;color:#059669;">
                     @if($stats['reviewed_total'] > 0)
                         {{ round(($stats['approved'] / $stats['reviewed_total']) * 100) }}%
                     @else
-                        0%
+                        —
                     @endif
                 </span>
             </div>
         </div>
     </div>
 
-    <!-- Resources Card -->
-    <div style="background: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">Resources</h4>
-        <ul style="list-style: none; padding: 0; margin: 0;">
-            <li style="padding: 0.5rem 0;">
-                <a href="{{ route('faculty.explorer') }}" style="color: #2563eb; text-decoration: none; font-size: 0.875rem;">→ Review Queue</a>
-            </li>
-            <li style="padding: 0.5rem 0;">
-                <a href="{{ route('research.index') }}" style="color: #2563eb; text-decoration: none; font-size: 0.875rem;">→ All Projects</a>
-            </li>
-            <li style="padding: 0.5rem 0;">
-                <a href="{{ route('profile.show') }}" style="color: #2563eb; text-decoration: none; font-size: 0.875rem;">→ My Profile</a>
-            </li>
-        </ul>
+    <div class="fc-section">
+        <div class="fc-section-head"><h3>Quick Links</h3></div>
+        <div style="padding:1rem 1.5rem;display:flex;flex-direction:column;gap:.5rem;">
+            <a href="{{ route('faculty.explorer') }}" style="color:#2563eb;text-decoration:none;font-size:.875rem;padding:.35rem 0;">→ Review Queue</a>
+            <a href="{{ route('research.index') }}" style="color:#2563eb;text-decoration:none;font-size:.875rem;padding:.35rem 0;">→ All Research</a>
+            <a href="{{ route('profile.show') }}" style="color:#2563eb;text-decoration:none;font-size:.875rem;padding:.35rem 0;">→ My Profile</a>
+        </div>
     </div>
 </div>
-
-<script>
-    // Apply status badge colors from data attributes
-    document.querySelectorAll('[data-status-badge]').forEach(badge => {
-        badge.style.backgroundColor = badge.dataset.bg;
-        badge.style.color = badge.dataset.text;
-    });
-</script>
-
-@endsection -->
+@endsection

@@ -83,7 +83,18 @@
     }
 
     @media (max-width: 900px) { .db-stats { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 600px) { .db-stats { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) {
+        .db-stats { grid-template-columns: repeat(2, 1fr); }
+        .db-welcome { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
+        .db-welcome-text h2 { font-size: 1.2rem; }
+        .db-welcome-action { width: 100%; text-align: center; justify-content: center; display: flex; }
+        .db-stat { min-height: 90px; padding: 1rem; }
+        .db-stat-num { font-size: 1.65rem; }
+    }
+    @media (max-width: 400px) {
+        .db-stat { min-height: 80px; }
+        .db-stat-num { font-size: 1.45rem; }
+    }
 
     .db-stat {
         background: #fff;
@@ -93,19 +104,23 @@
         position: relative;
         overflow: hidden;
         transition: box-shadow .15s, transform .15s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 110px;
     }
 
     .db-stat:hover { box-shadow: 0 8px 25px rgba(0,0,0,.08); transform: translateY(-2px); }
 
     .db-stat-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: .85rem;
-        font-size: 1.1rem;
+        font-size: 1rem;
+        flex-shrink: 0;
     }
 
     .db-stat-num {
@@ -113,7 +128,7 @@
         font-size: 2rem;
         font-weight: 700;
         line-height: 1;
-        margin-bottom: .25rem;
+        align-self: flex-end;
     }
 
     .db-stat-label {
@@ -269,7 +284,7 @@
     {{-- WELCOME --}}
     <div class="db-welcome">
         <div class="db-welcome-text">
-            <h2>Good day, {{ auth()->user()->first_name ?? auth()->user()->name }} 👋</h2>
+            <h2>Good day, {{ auth()->user()->full_name ?? auth()->user()->name }} 👋</h2>
             <p>Here's an overview of your research activity.</p>
         </div>
         <a href="{{ route('research.create') }}" class="db-welcome-action">+ New Project</a>
@@ -279,33 +294,43 @@
     <div class="db-stats">
         <div class="db-stat s-total">
             <div class="db-stat-accent"></div>
-            <div class="db-stat-icon">📁</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="db-stat-label">Total Projects</div>
+                <div class="db-stat-icon">📁</div>
+            </div>
             <div class="db-stat-num">{{ $stats['total_projects'] }}</div>
-            <div class="db-stat-label">Total Projects</div>
         </div>
         <div class="db-stat s-pending">
             <div class="db-stat-accent"></div>
-            <div class="db-stat-icon">⏳</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="db-stat-label">Pending</div>
+                <div class="db-stat-icon">⏳</div>
+            </div>
             <div class="db-stat-num">{{ $stats['pending'] }}</div>
-            <div class="db-stat-label">Pending</div>
         </div>
         <div class="db-stat s-review">
             <div class="db-stat-accent"></div>
-            <div class="db-stat-icon">🔍</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="db-stat-label">Under Review</div>
+                <div class="db-stat-icon">🔍</div>
+            </div>
             <div class="db-stat-num">{{ $stats['under_review'] }}</div>
-            <div class="db-stat-label">Under Review</div>
         </div>
         <div class="db-stat s-approved">
             <div class="db-stat-accent"></div>
-            <div class="db-stat-icon">✅</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="db-stat-label">Approved</div>
+                <div class="db-stat-icon">✅</div>
+            </div>
             <div class="db-stat-num">{{ $stats['approved'] }}</div>
-            <div class="db-stat-label">Approved</div>
         </div>
         <div class="db-stat s-rejected">
             <div class="db-stat-accent"></div>
-            <div class="db-stat-icon">❌</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="db-stat-label">Rejected</div>
+                <div class="db-stat-icon">❌</div>
+            </div>
             <div class="db-stat-num">{{ $stats['rejected'] }}</div>
-            <div class="db-stat-label">Rejected</div>
         </div>
     </div>
 

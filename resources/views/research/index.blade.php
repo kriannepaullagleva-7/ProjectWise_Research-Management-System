@@ -4,7 +4,6 @@
 
 @section('content')
 <style>
-    /* ── SEARCH BAR ── */
     .search-bar {
         background: white;
         border-radius: 14px;
@@ -348,11 +347,11 @@
                     </div>
 
                     <a href="{{ route('research.show', $project) }}" class="result-title">
-                        {{ Str::limit($project->title, 80) }}
+                        {{ \Illuminate\Support\Str::limit($project->title, 80) }}
                     </a>
 
                     <p class="result-abstract">
-                        {{ Str::limit($project->abstract, 130) }}
+                        {{ \Illuminate\Support\Str::limit($project->abstract, 130) }}
                     </p>
 
                     <div class="result-meta">

@@ -163,9 +163,13 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 110px;
         }
         .stat-label { font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-mute); font-weight: 500; }
-        .stat-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ink); line-height: 1; margin-top: .35rem; }
+        .stat-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ink); line-height: 1; align-self: flex-end; }
  
         /* ── Buttons ── */
         .btn {
@@ -193,14 +197,15 @@
             display: inline-flex; align-items: center;
             padding: .2rem .65rem;
             border-radius: 99px;
-            font-size: .72rem; font-weight: 500; letter-spacing: .02em;
+            font-size: .72rem; font-weight: 600; letter-spacing: .02em;
+            background: transparent !important;
         }
-        .badge-pending   { background: #fef9c3; color: #854d0e; }
-        .badge-approved  { background: #dcfce7; color: #14532d; }
-        .badge-rejected  { background: #fee2e2; color: #7f1d1d; }
-        .badge-review    { background: #dbeafe; color: #1e3a8a; }
-        .badge-draft     { background: #f3f4f6; color: #374151; }
-        .badge-revision  { background: #ffedd5; color: #7c2d12; }
+        .badge-pending   { color: #b45309; }
+        .badge-approved  { color: #059669; }
+        .badge-rejected  { color: #dc2626; }
+        .badge-review    { color: #2563eb; }
+        .badge-draft     { color: #6b7280; }
+        .badge-revision  { color: #ea580c; }
  
         /* ── Forms ── */
         .form-label { display: block; font-size: .8125rem; font-weight: 500; color: var(--ink-soft); margin-bottom: .4rem; }
@@ -233,10 +238,47 @@
         .notif-dot { width: 7px; height: 7px; background: var(--danger); border-radius: 50%; flex-shrink: 0; }
  
         /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            #sidebar { width: 200px; }
+            #main { margin-left: 200px; }
+            #topbar { padding: 0.75rem 1.5rem; }
+            #content { padding: 1.5rem; }
+        }
         @media (max-width: 768px) {
-            #sidebar { transform: translateX(-100%); }
+            :root { --sidebar-w: 0; }
+            #sidebar { 
+                width: 75vw; 
+                max-width: 280px;
+                transform: translateX(-100%); 
+                box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+            }
             #sidebar.open { transform: translateX(0); }
             #main { margin-left: 0; }
+            #topbar { padding: 0.75rem 1rem; }
+            #topbar .page-title { font-size: 0.9rem; }
+            #content { padding: 1rem; }
+            .card-body { padding: 1rem; }
+            .card-header { padding: 1rem; }
+            .btn { padding: 0.45rem 0.875rem; font-size: 0.8rem; }
+            .form-input, select.form-input { padding: 0.5rem 0.75rem; font-size: 1rem; }
+            .table { font-size: 0.75rem; }
+            .table th, .table td { padding: 0.5rem; }
+            h1 { font-size: 1.25rem !important; }
+            h2 { font-size: 1.1rem !important; }
+            h3 { font-size: 1rem !important; }
+        }
+        @media (max-width: 480px) {
+            :root { --sidebar-w: 0; }
+            #topbar { padding: 0.625rem 0.75rem; }
+            #topbar .page-title { font-size: 0.85rem; }
+            #content { padding: 0.75rem; }
+            .card-body { padding: 0.875rem; }
+            .card-header { padding: 0.875rem; }
+            .btn { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+            .form-input, select.form-input { padding: 0.45rem 0.625rem; font-size: 1rem; }
+            .stat-card { padding: 1rem; }
+            .stat-value { font-size: 1.5rem; }
+            .badge { padding: 0.15rem 0.5rem; font-size: 0.65rem; }
         }
     </style>
     @stack('styles')
@@ -246,9 +288,18 @@
 {{-- Sidebar --}}
 <aside id="sidebar" :class="{ 'open': sidebarOpen }">
     <div class="logo">
-        <img src="{{ asset('images/rms-logo.png') }}" alt="ProjectWise Logo" style="width: 100%; max-width: 150px; height: auto; margin-bottom: 0.75rem; border-radius: 8px;">
-        <div class="logo-text">ProjectWise</div>
-        <div class="logo-sub">Research Management System</div>
+        <div style="display:flex;align-items:center;gap:.875rem;">
+            <div style="width:38px;height:38px;background:linear-gradient(135deg,#2d5be3,#4f7bff);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(45,91,227,.4);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-text">ProjectWise</div>
+                <div class="logo-sub">Research Management System</div>
+            </div>
+        </div>
     </div>
  
     <nav>
@@ -316,9 +367,14 @@
     </nav>
  
     <div class="user-section">
-        <img src="{{ auth()->user()->avatar_url }}" alt="" class="user-avatar">
+        @php $avatarUrl = auth()->user()->avatar_url; @endphp
+        @if($avatarUrl)
+            <img src="{{ asset($avatarUrl) }}" alt="" class="user-avatar">
+        @else
+            <div class="user-avatar" style="background:#2d5be3;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0;">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+        @endif
         <div style="min-width:0;">
-            <div class="user-name truncate">{{ auth()->user()->full_name }}</div>
+            <div class="user-name truncate">{{ auth()->user()->full_name ?? auth()->user()->name }}</div>
             <div class="user-role">{{ auth()->user()->role }}</div>
         </div>
         <form method="POST" action="{{ route('logout') }}" style="margin-left:auto; flex-shrink:0;">
@@ -360,9 +416,9 @@
                     <div style="padding:.875rem 1.125rem;border-bottom:1px solid var(--border);font-size:.8125rem;font-weight:600;color:var(--ink);">Notifications</div>
                     <div style="max-height:320px;overflow-y:auto;">
                         @forelse(auth()->user()->notifications()->latest()->take(8)->get() as $notif)
-                        <!-- <div style="padding:.75rem 1.125rem;border-bottom:1px solid #f9fafb;display:flex;gap:.65rem;align-items:flex-start;{{ $notif->read_at ? '' : 'background:#f0f4ff;' }}"> -->
-                            @if(!$notif->read_at)<span class="notif-dot" style="margin-top:.35rem;"></span>@endif
-                            <div>
+                        <div style="padding:.75rem 1.125rem;border-bottom:1px solid #f9fafb;display:flex;gap:.65rem;align-items:flex-start;{{ $notif->read_at ? '' : 'background:#f0f4ff;' }}">
+                            @if(!$notif->read_at)<span class="notif-dot" style="margin-top:.35rem;flex-shrink:0;"></span>@endif
+                            <div style="flex:1;min-width:0;">
                                 <div style="font-size:.8125rem;color:var(--ink-soft);">{{ $notif->data['message'] ?? 'New notification' }}</div>
                                 <div style="font-size:.7rem;color:var(--ink-mute);margin-top:.2rem;">{{ $notif->created_at->diffForHumans() }}</div>
                             </div>

@@ -34,7 +34,11 @@
         </thead>
         <tbody>
             @forelse($users as $u)
-            <tr style="{{ $u->trashed() ? 'opacity:.5;' : '' }}">
+            @if($u->trashed())
+            <tr style="opacity: 0.5;">
+            @else
+            <tr>
+            @endif
                 <td>
                     <div style="display:flex;align-items:center;gap:.65rem;">
                         <img src="{{ $u->avatar_url }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="">
@@ -43,7 +47,13 @@
                 </td>
                 <td style="font-size:.8125rem;color:var(--ink-mute);">{{ $u->email }}</td>
                 <td>
-                    <span class="badge {{ $u->role === 'admin' ? 'badge-review' : ($u->role === 'faculty' ? 'badge-revision' : 'badge-draft') }}" style="text-transform:capitalize;">{{ $u->role }}</span>
+                    @if($u->role === 'admin')
+                        <span class="badge badge-review" style="text-transform:capitalize;">{{ $u->role }}</span>
+                    @elseif($u->role === 'faculty')
+                        <span class="badge badge-revision" style="text-transform:capitalize;">{{ $u->role }}</span>
+                    @else
+                        <span class="badge badge-draft" style="text-transform:capitalize;">{{ $u->role }}</span>
+                    @endif
                 </td>
                 <td style="font-size:.8125rem;color:var(--ink-mute);">{{ $u->department ?? '—' }}</td>
                 <td style="font-size:.8125rem;color:var(--ink-mute);">{{ $u->created_at->format('M d, Y') }}</td>
@@ -60,10 +70,17 @@
                     @if($u->id !== auth()->id())
                     <form method="POST" action="{{ route('admin.users.toggle', $u) }}" style="display:inline;">
                         @csrf
-                        <button type="submit" class="btn {{ $u->trashed() ? 'btn-primary' : 'btn-danger' }} btn-sm"
-                                onclick="return confirm('{{ $u->trashed() ? 'Reactivate' : 'Deactivate' }} this user?')">
-                            {{ $u->trashed() ? 'Reactivate' : 'Deactivate' }}
+                        @if($u->trashed())
+                        <button type="submit" class="btn btn-primary btn-sm"
+                                onclick="return confirm('Reactivate this user?')">
+                            Reactivate
                         </button>
+                        @else
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Deactivate this user?')">
+                            Deactivate
+                        </button>
+                        @endif
                     </form>
                     @else
                     <span style="font-size:.75rem;color:var(--ink-mute);">You</span>

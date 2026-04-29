@@ -205,8 +205,8 @@
 
         <div class="pf-avatar-row">
             <label class="pf-avatar-wrap">
-                <img id="avatarPreview" src="{{ $user->avatar_url }}" alt="Avatar">
-                <input type="file" name="avatar_preview" id="avatarInput" accept="image/*">
+                <img id="avatarPreview" src="{{ $user->avatar_url ? asset($user->avatar_url) : asset('images/default-avatar.png') }}" alt="Avatar">
+                <input type="file" name="avatar" id="avatarInput" accept="image/*" onchange="updateAvatarPreview(this)">
                 <div class="pf-avatar-overlay">📷 Edit</div>
             </label>
             <div class="pf-avatar-info">
@@ -235,9 +235,6 @@
                         Profile updated successfully.
                     </div>
                 @endif
-
-                {{-- Hidden file input that travels with the form --}}
-                <input type="file" name="avatar" id="avatarFormInput" accept="image/*" style="display:none;">
 
                 <div class="pf-form-grid">
                     <div class="pf-field full">
@@ -364,17 +361,13 @@
 </div>
 
 <script>
-// document.getElementById('avatarInput').addEventListener('change', function(e) {
-//     if (!e.target.files.length) return;
-//     const reader = new FileReader();
-//     reader.onload = function() {
-//         document.getElementById('avatarPreview').src = reader.result;
-//         // Transfer to the form's hidden file input
-//         const dt = new DataTransfer();
-//         dt.items.add(e.target.files[0]);
-//         document.getElementById('avatarFormInput').files = dt.files;
-//     };
-//     reader.readAsDataURL(e.target.files[0]);
-// });
+function updateAvatarPreview(input) {
+    if (!input.files || !input.files.length) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('avatarPreview').src = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
 </script>
 @endsection

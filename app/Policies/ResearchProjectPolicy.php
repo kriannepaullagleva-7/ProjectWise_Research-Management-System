@@ -33,10 +33,12 @@ class ResearchProjectPolicy
 
     /**
      * Determine whether the user can delete the model.
+     * Only the owner can delete, and only when the project is pending or rejected.
      */
     public function delete(User $user, ResearchProject $researchProject): bool
     {
-        return $user->id === $researchProject->user_id;
+        return $user->id === $researchProject->user_id
+            && in_array($researchProject->status, ['pending', 'rejected']);
     }
 
     /**

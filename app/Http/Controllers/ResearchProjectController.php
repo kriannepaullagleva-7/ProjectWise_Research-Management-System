@@ -7,13 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-/**
- * ResearchProjectController - Manage research project CRUD operations
- * @method void authorize(string $ability, mixed $arguments)
- */
 class ResearchProjectController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of research projects
      */
@@ -109,7 +107,7 @@ class ResearchProjectController extends Controller
             'category' => 'required|string|max:100',
             'field_of_study' => 'nullable|string|max:100',
             'keywords' => 'nullable|string|max:500',
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:20480',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:51200',
         ]);
 
         $project = ResearchProject::create([
@@ -147,8 +145,16 @@ class ResearchProjectController extends Controller
         $researchProject->increment('views_count');
         
         $researchProject->load('user', 'assignedFaculty', 'reviews');
+        
+        // Check if user has saved this project
+        $isSaved = false;
+        if (Auth::check()) {
+            $isSaved = \App\Models\SavedItem::where('user_id', Auth::id())
+                ->where('research_project_id', $researchProject->id)
+                ->exists();
+        }
 
-        return view('research.show', compact('researchProject'));
+        return view('research.show', compact('researchProject', 'isSaved'));
     }
 
     /**
@@ -174,7 +180,7 @@ class ResearchProjectController extends Controller
             'category' => 'required|string|max:100',
             'field_of_study' => 'nullable|string|max:100',
             'keywords' => 'nullable|string|max:500',
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:20480',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:51200',
         ]);
 
         $researchProject->update([

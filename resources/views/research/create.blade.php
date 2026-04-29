@@ -383,7 +383,7 @@
                         <p class="drop-zone-label" id="drop-label">
                             Drop your file here or <strong>browse</strong>
                         </p>
-                        <p class="drop-zone-formats">PDF, DOC, DOCX — max 20 MB</p>
+                        <p class="drop-zone-formats">PDF, DOC, DOCX — max 50 MB</p>
                     </div>
                     <input type="file" id="file" name="file" accept=".pdf,.doc,.docx" style="display:none;"
                            onchange="updateFileLabel(this)">

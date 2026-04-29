@@ -14,20 +14,32 @@ class FacultyController extends Controller
 {
     use AuthorizesRequests;
 
-    public function explorer(): View
+    public function explorer(Request $request): View
     {
-        $projects = ResearchProject::whereIn('status', ['pending', 'under_review'])
-            ->where(function ($query) {
-                $query->whereNull('assigned_faculty_id')
-                    ->orWhere('assigned_faculty_id', Auth::id());
+        $query = ResearchProject::where(function ($q) {
+                $q->whereNull('assigned_faculty_id')
+                  ->orWhere('assigned_faculty_id', Auth::id());
             })
-            ->with('user', 'reviews')
-            ->latest()
-            ->paginate(15);
+            ->with('user', 'reviews');
 
-        return view('faculty.explorer', [
-            'projects' => $projects,
-        ]);
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        } else {
+            $query->whereIn('status', ['pending', 'under_review']);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%')
+                      ->orWhere('full_name', 'like', '%' . $search . '%'));
+            });
+        }
+
+        $projects = $query->latest()->paginate(15)->appends($request->query());
+
+        return view('faculty.explorer', ['projects' => $projects]);
     }
 
     /**
@@ -42,7 +54,7 @@ class FacultyController extends Controller
             $researchProject->update(['assigned_faculty_id' => Auth::id()]);
         }
 
-        $existingReview = FacultyReview::where('research_project_id', $researchProject->id)
+        $existingReview = FacultyReview::where('research_project_id', $researchProject->id) 
             ->where('faculty_id', Auth::id())
             ->first();
 
