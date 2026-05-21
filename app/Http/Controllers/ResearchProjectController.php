@@ -121,7 +121,6 @@ class ResearchProjectController extends Controller
             'status' => 'pending',
             'submission_date' => now(),
             'approval_date' => null,
-            'view_count' => 0,
             'views_count' => 0,
             'downloads_count' => 0,
         ]);
@@ -140,8 +139,6 @@ class ResearchProjectController extends Controller
      */
     public function show(ResearchProject $researchProject): View
     {
-        // Increment view counts
-        $researchProject->increment('view_count');
         $researchProject->increment('views_count');
         
         $researchProject->load('user', 'assignedFaculty', 'reviews');

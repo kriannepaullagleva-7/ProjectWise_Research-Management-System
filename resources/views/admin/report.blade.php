@@ -138,6 +138,55 @@
     </table>
 </div>
 
+{{-- All Projects (paginated) --}}
+<div class="card" style="margin-top:1.5rem;">
+    <div class="card-header">
+        <h3>All Research Projects</h3>
+        <span style="font-size:.8rem;color:var(--ink-mute);">{{ $projects->total() }} total</span>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Views</th>
+                <th>Downloads</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($projects as $p)
+            <tr>
+                <td>
+                    <a href="{{ route('research.show', $p->id) }}" style="color:var(--ink);font-weight:500;text-decoration:none;">
+                        {{ \Illuminate\Support\Str::limit($p->title, 50) }}
+                    </a>
+                </td>
+                <td style="font-size:.8125rem;color:var(--ink-mute);">{{ optional($p->user)->full_name ?? optional($p->user)->name ?? '—' }}</td>
+                <td style="font-size:.8125rem;color:var(--ink-mute);">{{ $p->category }}</td>
+                <td>
+                    <span class="badge badge-{{ ['approved'=>'approved','pending'=>'pending','rejected'=>'rejected','under_review'=>'review'][$p->status] ?? 'draft' }}">
+                        {{ $p->status_label }}
+                    </span>
+                </td>
+                <td style="font-size:.8125rem;color:var(--ink-mute);">{{ $p->created_at->format('M d, Y') }}</td>
+                <td style="font-size:.8125rem;">{{ number_format($p->views_count) }}</td>
+                <td style="font-size:.8125rem;">{{ number_format($p->downloads_count) }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--ink-mute);">No projects yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+    @if($projects->hasPages())
+    <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);">
+        {{ $projects->links() }}
+    </div>
+    @endif
+</div>
+
 @endsection
 
 @push('scripts')
@@ -146,8 +195,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // const months = @json($monthlySubmissions?->pluck('month')->values() ?? []);
-    // const counts = @json($monthlySubmissions?->pluck('count')->values() ?? []);
+    const months = @json($monthlySubmissions?->pluck('month')->values() ?? []);
+    const counts = @json($monthlySubmissions?->pluck('count')->values() ?? []);
 
     const canvas = document.getElementById('monthlyChart');
 

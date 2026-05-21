@@ -7,11 +7,13 @@
     .act-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
     @media (max-width: 768px) { .act-grid { grid-template-columns: 1fr; } }
 </style>
+
 <div class="act-grid">
 
     <div class="card">
         <div class="card-header">
             <h3>Recent User Registrations</h3>
+            <span style="font-size:.8rem;color:var(--ink-mute);">{{ $recentUsers->total() }} total</span>
         </div>
         <table class="table">
             <thead><tr><th>Name</th><th>Role</th><th>Joined</th></tr></thead>
@@ -40,11 +42,17 @@
                 @endforelse
             </tbody>
         </table>
+        @if($recentUsers->hasPages())
+        <div style="padding:.875rem 1.5rem;border-top:1px solid var(--border);">
+            {{ $recentUsers->links() }}
+        </div>
+        @endif
     </div>
 
     <div class="card">
         <div class="card-header">
             <h3>Recent Project Submissions</h3>
+            <span style="font-size:.8rem;color:var(--ink-mute);">{{ $recentProjects->total() }} total</span>
         </div>
         <table class="table">
             <thead><tr><th>Title</th><th>Author</th><th>Status</th><th>When</th></tr></thead>
@@ -69,6 +77,11 @@
                 @endforelse
             </tbody>
         </table>
+        @if($recentProjects->hasPages())
+        <div style="padding:.875rem 1.5rem;border-top:1px solid var(--border);">
+            {{ $recentProjects->links() }}
+        </div>
+        @endif
     </div>
 
 </div>

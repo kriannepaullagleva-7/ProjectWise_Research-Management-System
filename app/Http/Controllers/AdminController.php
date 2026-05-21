@@ -170,10 +170,10 @@ class AdminController extends Controller
         ]);
     }
 
-    public function activityLog(): View
+    public function activityLog(Request $request): View
     {
-        $recentUsers = User::latest()->take(20)->get();
-        $recentProjects = ResearchProject::with('user')->latest()->take(20)->get();
+        $recentUsers = User::latest()->paginate(15, ['*'], 'users_page');
+        $recentProjects = ResearchProject::with('user')->latest()->paginate(15, ['*'], 'projects_page');
 
         return view('admin.activity', [
             'recentUsers'    => $recentUsers,

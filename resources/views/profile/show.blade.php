@@ -203,21 +203,21 @@
     {{-- PERSONAL INFORMATION --}}
     <div class="pf-card">
 
+        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
         <div class="pf-avatar-row">
             <label class="pf-avatar-wrap">
                 <img id="avatarPreview" src="{{ $user->avatar_url ? asset($user->avatar_url) : asset('images/default-avatar.png') }}" alt="Avatar">
                 <input type="file" name="avatar" id="avatarInput" accept="image/*" onchange="updateAvatarPreview(this)">
-                <div class="pf-avatar-overlay">📷 Edit</div>
+                <div class="pf-avatar-overlay">Change Photo</div>
             </label>
             <div class="pf-avatar-info">
-                <h4>{{ $user->full_name }}</h4>
+                <h4>{{ $user->full_name ?? $user->name }}</h4>
                 <p>{{ ucfirst($user->role) }} · {{ $user->department ?? 'No department set' }}</p>
             </div>
         </div>
-
-        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
 
             <div class="pf-card-head">
                 <h3>Personal Information</h3>

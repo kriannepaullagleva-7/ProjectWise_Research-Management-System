@@ -1,145 +1,148 @@
 @extends('layouts.app')
-
 @section('title', 'Saved Library')
-@section('page-title', 'My Saved Research Library')
+@section('page-title', 'My Saved Library')
 
 @section('content')
-<div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+<style>
+    .lib-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .lib-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: box-shadow .2s, transform .2s;
+    }
+    .lib-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .lib-card-body { padding: 1.25rem 1.35rem; flex: 1; display: flex; flex-direction: column; gap: .75rem; }
+    .lib-card-footer {
+        padding: .875rem 1.35rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        display: flex;
+        gap: .5rem;
+    }
+    .lib-title { font-size: .9375rem; font-weight: 700; color: var(--ink); text-decoration: none; line-height: 1.4; display: block; }
+    .lib-title:hover { color: var(--accent); }
+    .lib-author { font-size: .8rem; color: var(--ink-mute); }
+    .lib-abstract { font-size: .8125rem; color: var(--ink-soft); line-height: 1.65; flex: 1; }
+    .lib-tags { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+    .lib-stats { display: flex; gap: 1rem; font-size: .75rem; color: var(--ink-mute); padding-top: .65rem; border-top: 1px solid #f3f4f6; }
+    .lib-stat { display: flex; align-items: center; gap: .3rem; }
+
+    .sp-pending      { background:#fef3c7; color:#92400e; }
+    .sp-under_review { background:#e0e7ff; color:#3730a3; }
+    .sp-approved     { background:#d1fae5; color:#065f46; }
+    .sp-rejected     { background:#fee2e2; color:#7f1d1d; }
+
+    .lib-empty {
+        text-align: center;
+        padding: 5rem 2rem;
+    }
+    .lib-empty-icon {
+        width: 64px; height: 64px;
+        background: var(--surface);
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1.25rem;
+        color: var(--ink-mute);
+    }
+</style>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem;">
     <div>
-        <p style="color: #6b7280; margin: 0; font-size: 1rem;">Your collection of saved research projects</p>
-        @if(!$saved->isEmpty())
-        <p style="color: #9ca3af; margin: 0.5rem 0 0 0; font-size: 0.875rem;">{{ $saved->count() }} item(s) saved</p>
+        <p style="margin:0;color:var(--ink-soft);font-size:.875rem;">Your saved research collection</p>
+        @if($saved->total() > 0)
+        <p style="margin:.25rem 0 0;color:var(--ink-mute);font-size:.8rem;">{{ $saved->total() }} item(s) saved</p>
         @endif
     </div>
+    <a href="{{ route('research.index') }}" class="btn btn-ghost btn-sm">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Browse Research
+    </a>
 </div>
 
 @if($saved->isEmpty())
-<div style="background: white; border-radius: 0.5rem; padding: 3rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
-    <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
-    <p style="color: #6b7280; margin: 0; font-size: 1.125rem;">No saved items yet</p>
-    <p style="color: #9ca3af; margin: 0.5rem 0 0 0;">Explore research and save items to your library</p>
-    <a href="{{ route('research.index') }}" style="background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 0.375rem; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 1rem; transition: background 0.2s;">Browse Research</a>
+<div class="card">
+    <div class="lib-empty">
+        <div class="lib-empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3 style="font-size:.95rem;font-weight:600;color:var(--ink-soft);margin:0 0 .35rem;">No saved items yet</h3>
+        <p style="font-size:.85rem;color:var(--ink-mute);margin:0 0 1.25rem;">Explore research and save papers to build your personal library.</p>
+        <a href="{{ route('research.index') }}" class="btn btn-primary">Browse Research</a>
+    </div>
 </div>
 @else
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+
+<div class="lib-grid">
     @foreach($saved as $item)
-    @php
-        $project = $item->researchProject;
-        $statusColors = [
-            'pending' => ['bg' => '#fef3c7', 'text' => '#92400e'],
-            'under_review' => ['bg' => '#dbeafe', 'text' => '#1e40af'],
-            'approved' => ['bg' => '#d1fae5', 'text' => '#065f46'],
-            'rejected' => ['bg' => '#fee2e2', 'text' => '#7f1d1d'],
-        ];
-        $colors = $statusColors[$project->status] ?? ['bg' => '#e5e7eb', 'text' => '#374151'];
-    @endphp
-    <div style="background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; transition: box-shadow 0.2s, transform 0.2s; display: flex; flex-direction: column;">
-        <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
-            {{-- Header with title and unsave button --}}
-            <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
-                <div style="flex: 1;">
-                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; line-height: 1.5;">
-                        <a href="{{ route('research.show', $project) }}" style="color: #2563eb; text-decoration: none; transition: color 0.2s;">
-                            {{ \Illuminate\Support\Str::limit($project->title, 55) }}
-                        </a>
-                    </h3>
-                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">{{ $project->user->full_name ?? $project->user->name }}</p>
-                </div>
-                <form method="POST" action="{{ route('saved.toggle', $project) }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; padding: 0; color: #ef4444; transition: transform 0.2s;" title="Remove from saved">❤️</button>
-                </form>
-            </div>
-
-            {{-- Description --}}
-            <p style="margin: 0 0 1rem 0; color: #4b5563; font-size: 0.875rem; line-height: 1.6; flex: 1;">
-                {{ \Illuminate\Support\Str::limit($project->description ?? $project->abstract ?? 'No description', 120) }}
-            </p>
-
-            {{-- Status badge and category --}}
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                @php
-                    $bgColor = $colors['bg'];
-                    $textColor = $colors['text'];
-                @endphp
-                <span class="status-badge" data-bg="{{ $bgColor }}" data-text="{{ $textColor }}">
-                    {{ str_replace('_', ' ', $project->status) }}
+    @php $project = $item->researchProject; @endphp
+    <div class="lib-card">
+        <div class="lib-card-body">
+            <div class="lib-tags">
+                <span class="sp-{{ $project->status }}" style="display:inline-flex;align-items:center;padding:.2rem .65rem;border-radius:99px;font-size:.68rem;font-weight:700;letter-spacing:.02em;text-transform:capitalize;">
+                    {{ str_replace('_',' ', $project->status) }}
                 </span>
-                <span style="background: #f3f4f6; color: #6b7280; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem;">
+                <span style="background:var(--surface);color:var(--ink-mute);border:1px solid var(--border);padding:.2rem .65rem;border-radius:99px;font-size:.7rem;">
                     {{ $project->category ?? 'Uncategorized' }}
                 </span>
             </div>
 
-            {{-- Stats --}}
-            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: #6b7280; border-top: 1px solid #f3f4f6; padding-top: 1rem;">
-                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span>{{ number_format($project->views_count ?? 0) }}</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    <span>{{ number_format($project->downloads_count ?? 0) }}</span>
+            <div>
+                <a href="{{ route('research.show', $project) }}" class="lib-title">
+                    {{ \Illuminate\Support\Str::limit($project->title, 70) }}
+                </a>
+                <div class="lib-author" style="margin-top:.25rem;">
+                    {{ $project->user->full_name ?? $project->user->name }}
                 </div>
             </div>
 
-            {{-- Action buttons --}}
-            <div style="display: flex; gap: 0.75rem; margin-top: auto;">
-                <a href="{{ route('research.show', $project) }}" style="flex: 1; background: #2563eb; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; text-decoration: none; font-weight: 500; text-align: center; font-size: 0.875rem; transition: background 0.2s;">
-                    View Project
-                </a>
-                @if($project->file_path)
-                <a href="{{ route('research.download', $project) }}" style="flex: 1; background: #f3f4f6; color: #374151; padding: 0.5rem 1rem; border-radius: 0.375rem; text-decoration: none; font-weight: 500; text-align: center; font-size: 0.875rem; transition: background 0.2s;">
-                    Download
-                </a>
-                @endif
+            <p class="lib-abstract">
+                {{ \Illuminate\Support\Str::limit($project->description ?? $project->abstract ?? 'No description available.', 120) }}
+            </p>
+
+            <div class="lib-stats">
+                <div class="lib-stat">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    {{ number_format($project->views_count) }}
+                </div>
+                <div class="lib-stat">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    {{ number_format($project->downloads_count) }}
+                </div>
+                <div class="lib-stat" style="margin-left:auto;">
+                    {{ $project->created_at->format('M d, Y') }}
+                </div>
             </div>
+        </div>
+
+        <div class="lib-card-footer">
+            <a href="{{ route('research.show', $project) }}" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View</a>
+            @if($project->file_path)
+            <a href="{{ route('research.download', $project) }}" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;">Download</a>
+            @endif
+            <form method="POST" action="{{ route('saved.toggle', $project) }}" style="display:inline;">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm" title="Remove from saved">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </button>
+            </form>
         </div>
     </div>
     @endforeach
 </div>
 
 @if($saved->hasPages())
-<div style="margin-top: 2.5rem; display: flex; justify-content: center;">
+<div style="display:flex;justify-content:center;">
     {{ $saved->links() }}
 </div>
 @endif
 @endif
-
-<style>
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
-        font-weight: 500;
-        text-transform: capitalize;
-    }
-    @media (hover: hover) {
-        div[style*="border: 1px solid #e5e7eb"] {
-            cursor: pointer;
-        }
-        div[style*="border: 1px solid #e5e7eb"]:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-        a[style*="background: #2563eb"] {
-            cursor: pointer;
-        }
-        a[style*="background: #2563eb"]:hover {
-            background: #1d4ed8;
-        }
-        a[style*="background: #f3f4f6"] {
-            cursor: pointer;
-        }
-        a[style*="background: #f3f4f6"]:hover {
-            background: #e5e7eb;
-        }
-    }
-</style>
-
-<script>
-    document.querySelectorAll('.status-badge').forEach(el => {
-        el.style.backgroundColor = el.getAttribute('data-bg');
-        el.style.color = el.getAttribute('data-text');
-    });
-</script>
 @endsection

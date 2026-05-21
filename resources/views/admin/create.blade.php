@@ -3,86 +3,98 @@
 @section('page-title', 'Create New User')
 
 @section('content')
-<div style="max-width: 600px;">
-    <div style="margin-bottom: 1.5rem;">
-        <a href="{{ route('admin.users') }}" style="color: #2563eb; text-decoration: none; font-size: 0.875rem;">← Back to Users</a>
+<div style="max-width:620px;">
+
+    <div style="margin-bottom:1.25rem;">
+        <a href="{{ route('admin.users') }}" class="btn btn-ghost btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Users
+        </a>
     </div>
 
-    <div style="background: white; border-radius: 0.5rem; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <h1 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; font-weight: 700;">Create New User</h1>
-
-        @if ($errors->any())
-        <div style="background: #fee2e2; color: #7f1d1d; padding: 1rem; border-radius: 0.375rem; margin-bottom: 1.5rem;">
-            <strong>Please fix the following errors:</strong>
-            <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    <div class="card">
+        <div class="card-header">
+            <h3>New User Account</h3>
         </div>
-        @endif
+        <div class="card-body">
 
-        <form method="POST" action="{{ route('admin.users.store') }}">
-            @csrf
-
-            <div style="margin-bottom: 1.5rem;">
-                <label for="name" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #111827;">
-                    Full Name <span style="color: #dc2626;">*</span>
-                </label>
-                <input type="text" name="name" id="name" value="{{ old('name') }}" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-                @error('name')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
+            @if($errors->any())
+            <div class="flash flash-error" style="margin-bottom:1.25rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ $errors->first() }}
             </div>
+            @endif
 
-            <div style="margin-bottom: 1.5rem;">
-                <label for="email" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #111827;">
-                    Email <span style="color: #dc2626;">*</span>
-                </label>
-                <input type="email" name="email" id="email" value="{{ old('email') }}" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-                @error('email')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
-            </div>
+            <form method="POST" action="{{ route('admin.users.store') }}" style="display:flex;flex-direction:column;gap:1.125rem;">
+                @csrf
 
-            <div style="margin-bottom: 1.5rem;">
-                <label for="role" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #111827;">
-                    Role <span style="color: #dc2626;">*</span>
-                </label>
-                <select name="role" id="role" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-                    <option value="">-- Select Role --</option>
-                    <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student</option>
-                    <option value="faculty" {{ old('role') === 'faculty' ? 'selected' : '' }}>Faculty</option>
-                    <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrator</option>
-                </select>
-                @error('role')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
-            </div>
-
-            <div style="margin-bottom: 1.5rem;">
-                <label for="department" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #111827;">
-                    Department
-                </label>
-                <input type="text" name="department" id="department" value="{{ old('department') }}" placeholder="e.g. Computer Science" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-                @error('department')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
                 <div>
-                    <label for="password" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #111827;">
-                        Password <span style="color: #dc2626;">*</span>
+                    <label class="form-label" for="name">
+                        Full Name <span style="color:var(--danger);">*</span>
                     </label>
-                    <input type="password" name="password" id="password" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-                    @error('password')<p style="color: #dc2626; margin-top: 0.25rem; font-size: 0.875rem;">{{ $message }}</p>@enderror
+                    <input class="form-input" type="text" id="name" name="name"
+                           value="{{ old('name') }}" required placeholder="e.g. Juan dela Cruz">
+                    @error('name')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
-                <div>
-                    <label for="password_confirmation" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #111827;">
-                        Confirm Password <span style="color: #dc2626;">*</span>
-                    </label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-                </div>
-            </div>
 
-            <div style="display: flex; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                <button type="submit" style="background: #2563eb; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer;">Create User</button>
-                <a href="{{ route('admin.users') }}" style="background: #e5e7eb; color: #374151; padding: 0.75rem 1.5rem; border-radius: 0.375rem; text-decoration: none; font-weight: 600;">Cancel</a>
-            </div>
-        </form>
+                <div>
+                    <label class="form-label" for="email">
+                        Email Address <span style="color:var(--danger);">*</span>
+                    </label>
+                    <input class="form-input" type="email" id="email" name="email"
+                           value="{{ old('email') }}" required placeholder="user@university.edu">
+                    @error('email')<p class="form-error">{{ $message }}</p>@enderror
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div>
+                        <label class="form-label" for="role">
+                            Role <span style="color:var(--danger);">*</span>
+                        </label>
+                        <select class="form-input" id="role" name="role" required>
+                            <option value="">— Select role —</option>
+                            <option value="student"  {{ old('role') === 'student'  ? 'selected' : '' }}>Student</option>
+                            <option value="faculty"  {{ old('role') === 'faculty'  ? 'selected' : '' }}>Faculty</option>
+                            <option value="admin"    {{ old('role') === 'admin'    ? 'selected' : '' }}>Administrator</option>
+                        </select>
+                        @error('role')<p class="form-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="form-label" for="department">Department</label>
+                        <input class="form-input" type="text" id="department" name="department"
+                               value="{{ old('department') }}" placeholder="e.g. Computer Science">
+                        @error('department')<p class="form-error">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div>
+                        <label class="form-label" for="password">
+                            Password <span style="color:var(--danger);">*</span>
+                        </label>
+                        <input class="form-input" type="password" id="password" name="password"
+                               required placeholder="Min. 8 characters">
+                        @error('password')<p class="form-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="form-label" for="password_confirmation">
+                            Confirm Password <span style="color:var(--danger);">*</span>
+                        </label>
+                        <input class="form-input" type="password" id="password_confirmation"
+                               name="password_confirmation" required placeholder="Repeat password">
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:.75rem;padding-top:1rem;border-top:1px solid var(--border);">
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Create User
+                    </button>
+                    <a href="{{ route('admin.users') }}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
